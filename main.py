@@ -1,22 +1,20 @@
-def caching_fibonacci():   #Створюємо функцію
-    cache = {}   #Створюємо пустий словник
+import re 
+from functools import reduce
+from typing import Callable
 
-    def fibonacci(n):   #Створюємо другу функцію
-        if n <= 0:    #Задаємо умови та повертаємо результат
-            return 0
-        elif n == 1:
-            return 1
-        else:
-            if n in cache:
-                return cache[n]
+def generator_numbers(text: str):
+    numbers = map(float, filter(lambda x: re.match(r"\d+[\.,]{0,1}\d+.", x), text.split(" ")))
+    for number in numbers:
+        yield number
+    
 
-        cache[n] = fibonacci(n - 1) + fibonacci(n - 2)     #Додаємо елемент в словник
-        return cache[n]     #Повертаємо елемент зі словника
+def sum_profit(text: str, func: Callable):
+    return reduce(lambda x,y: x+y, func(text))
+   
+    
 
-    return fibonacci    #Повертаємо результат функції
+   
 
-fib = caching_fibonacci()    # Отримуємо функцію fibonacci
-
-# Використовуємо функцію fibonacci для обчислення чисел Фібоначчі
-print(fib(10))  # Виведе 55
-print(fib(15))  # Виведе 610
+text = "Загальний дохід працівника складається з декількох частин: 1000.01 як основний дохід, доповнений додатковими надходженнями 27.45 і 324.00 доларів."
+total_income = sum_profit(text, generator_numbers)
+print(f"Загальний дохід: {total_income}")
