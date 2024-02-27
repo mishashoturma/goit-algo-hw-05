@@ -1,20 +1,67 @@
-import re 
-from functools import reduce
-from typing import Callable
-
-def generator_numbers(text: str):
-    numbers = map(float, filter(lambda x: re.match(r"\d+[\.,]{0,1}\d+.", x), text.split(" ")))
-    for number in numbers:
-        yield number
-    
-
-def sum_profit(text: str, func: Callable):
-    return reduce(lambda x,y: x+y, func(text))
-   
-    
-
+def input_error(func):
+    def inner(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except ValueError:
+            return "Give me name and phone please."
+        except KeyError:
+            return "Key not found"
+        except IndexError:
+            return "Index not found"
+    return inner
    
 
-text = "Загальний дохід працівника складається з декількох частин: 1000.01 як основний дохід, доповнений додатковими надходженнями 27.45 і 324.00 доларів."
-total_income = sum_profit(text, generator_numbers)
-print(f"Загальний дохід: {total_income}")
+def parse_input(user_input):
+    cmd, *args = user_input.split()
+    cmd = cmd.strip().lower()
+    return cmd, *args
+
+@input_error
+def add_contact(args, contacts):
+    name, phone = args
+    contacts[name] = phone
+    return f"Контакт {name} додано"
+
+@input_error
+def change_contact(args, contacts):
+    name, phone = args
+    contacts[name] = phone
+    return f"Контакт {name} змінено"
+
+@input_error
+def show_phone(args, contacts):
+    key = args[0]
+    if key in contacts:
+        value = contacts.get(key)
+    return value
+
+@input_error
+def show_all(contacts):
+    for key, value in contacts.items():
+        print(key, value)
+
+def main():
+    contacts = {}
+    print("Welcome to the assistant bot!")
+    while True:
+        user_input = input("Enter a command: ")
+        command, *args = parse_input(user_input)
+
+        if command in ["close", "exit"]:
+            print("Good bye!")
+            break
+        elif command == "hello":
+            print("How can I help you?")
+        elif command == "add":
+            print(add_contact(args, contacts))
+        elif command == "change":
+            print(change_contact(args, contacts))
+        elif command == "phone":
+            print(show_phone(args, contacts))
+        elif command == "all":
+            print(show_all(contacts))
+        else:
+            print("Invalid command.")
+
+if __name__ == "__main__":
+    main()
